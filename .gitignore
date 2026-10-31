@@ -1,0 +1,24 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.csproj.user
+
+# .NET build files
+**/bin/
+**/obj/
+
+# Node.js
+**/node_modules/
+**/dist/
+
+# Environment variables
+**/.env
+**/.env.*
+!**/.env.example
+
+# Development secrets
+**/appsettings.Development.json
+
+# Logs
+*.log
