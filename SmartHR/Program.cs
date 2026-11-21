@@ -38,8 +38,21 @@ namespace SmartHR
             {
                 options.AddPolicy("ReactFrontend", policy =>
                 {
+                    var frontendUrl = builder.Configuration["FrontendUrl"];
+
+                    if (!string.IsNullOrWhiteSpace(frontendUrl))
+                    {
+                        policy.WithOrigins(
+                            "http://localhost:5173",
+                            frontendUrl
+                        );
+                    }
+                    else
+                    {
+                        policy.WithOrigins("http://localhost:5173");
+                    }
+
                     policy
-                        .WithOrigins("http://localhost:5173")
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
@@ -201,6 +214,18 @@ namespace SmartHR
             var app = builder.Build();
 
             // ============================================
+            // Apply EF Core migrations
+            // ============================================
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider
+                    .GetRequiredService<ApplicationDbContext>();
+
+                dbContext.Database.Migrate();
+            }
+
+            // ============================================
             // Swagger
             // ============================================
 
@@ -210,7 +235,14 @@ namespace SmartHR
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            // ============================================
+            // HTTPS
+            // ============================================
+
+            if (!app.Environment.IsProduction())
+            {
+                app.UseHttpsRedirection();
+            }
 
             // ============================================
             // Middleware
